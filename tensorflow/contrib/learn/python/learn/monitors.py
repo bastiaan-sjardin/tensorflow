@@ -118,7 +118,7 @@ class BaseMonitor(object):
                              .format(self.min_loss_i, self.min_loss))
         return stop_now
 
-    def create_val_feed_dict(self, inp, out):
+    def create_val_feed_dict(self, inp, out, add_feed_dict=None):
         """Validation requires access to TensorFlow placeholders. Not used in this Monitor"""
         pass
 
@@ -174,10 +174,18 @@ class ValidationMonitor(BaseMonitor):
             return
         self._summary_writer = train.SummaryWriter(os.path.join(estimator._output_dir, 'eval'))
 
-    def create_val_feed_dict(self, inp, out):
-        """Set tensorflow placeholders and create validation data feed"""
+    def create_val_feed_dict(self, inp, out, add_feed_dict=None):
+        """Set tensorflow placeholders and create validation data feed
+
+            inp: Placeholder for validation features.
+            out: Placeholder for valication labels.
+            add_feed_dict: Optional dict with values to be added to the created
+                validation feed_dict.
+        """
         self.val_feeder.set_placeholders(inp, out)
         self.val_dict = self.val_feeder.get_feed_dict_fn()()
+        if add_feed_dict:
+          self.val_dict.update(add_feed_dict)
 
     def _set_last_loss_seen(self):
         """Sets self.last_loss_seen to most recent validation loss

@@ -441,8 +441,11 @@ class TensorFlowEstimator(_sklearn.BaseEstimator):
                 max_to_keep=self._config.keep_checkpoint_max,
                 keep_checkpoint_every_n_hours=self._config.keep_checkpoint_every_n_hours)
 
-            # Enable monitor to create validation data dict with appropriate tf placeholders
-            self._monitor.create_val_feed_dict(self._inp, self._out)
+            # Enable monitor to create validation data dict with appropriate tf placeholders.
+            # Set dropouts to 1 (if any) to get an accurate CV result.
+            self._monitor.create_val_feed_dict(
+                self._inp, self._out,
+                {prob: 1.0 for prob in self._graph.get_collection(DROPOUTS)})
 
             # Create session to run model with.
             self._session = session.Session(self._config.tf_master, config=self._config.tf_config)
