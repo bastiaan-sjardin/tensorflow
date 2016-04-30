@@ -184,6 +184,8 @@ class ValidationMonitor(BaseMonitor):
 
         Also stores this value to appropriate buffers
         """
+        if self.steps % self.print_steps != 0:
+          return
         [val_loss] = self.sess.run([self.loss_expression_tensor], feed_dict=self.val_dict)
         self.last_loss_seen = val_loss
         self.all_val_loss_buffer.append(val_loss)
